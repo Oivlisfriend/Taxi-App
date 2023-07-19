@@ -1,0 +1,114 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ClassificacaoMotorista {
+  id                 Int       @id @default(autoincrement())
+  id_motorista       Int
+  pontuacao          Float
+  data_classificacao DateTime  @db.Date
+  descricao          String?
+  motorista          Motorista @relation(fields: [id_motorista], references: [id_motorista])
+}
+
+model Cliente {
+  id_cliente    Int        @id @default(autoincrement())
+  id_utilizador Int
+  localizacao_x Int?
+  localizacao_y Int?
+  utilizador    Utilizador @relation(fields: [id_utilizador], references: [id_utilizador])
+  Viagem        Viagem[]
+}
+
+model Empresa {
+  id_empresa Int         @id @default(autoincrement())
+  nome       String
+  motoristas Motorista[]
+  veiculos   Veiculo[]
+}
+
+model ListaEspera {
+  id_lista_espera Int    @id @default(autoincrement())
+  id_viagem       Int
+  tempo_espera    Int?
+  viagem          Viagem @relation(fields: [id_viagem], references: [id_viagem])
+}
+
+model Marca {
+  id_marca Int       @id @default(autoincrement())
+  marca    String
+  veiculos Veiculo[]
+}
+
+model Motorista {
+  id_motorista             Int                      @id @default(autoincrement())
+  id_utilizador            Int
+  id_empresa               Int?
+  grau_cumprimento_horario Int?
+  classificacao            Int?
+  kms_realizados           Int?
+  disponibilidade          Boolean?
+  utilizador               Utilizador               @relation(fields: [id_utilizador], references: [id_utilizador])
+  empresa                  Empresa?                 @relation(fields: [id_empresa], references: [id_empresa])
+  veiculos                 Veiculo[]
+  classificacoesMotorista  ClassificacaoMotorista[]
+  viagens                  Viagem[]
+}
+
+model Utilizador {
+  id_utilizador   Int         @id @default(autoincrement())
+  nome            String
+  email           String      @unique
+  password        String
+  morada          String
+  data_nascimento DateTime
+  clientes        Cliente[]
+  motoristas      Motorista[]
+}
+
+model Veiculo {
+  id_veiculo           Int          @id @default(autoincrement())
+  tipo_veiculo         tipo_veiculo
+  id_empresa           Int?
+  id_motorista         Int?
+  velocidade_media_km  Float?
+  coordenadas_origem_x Int?
+  coordenadas_origem_y Int?
+  km                   Float?
+  preco_base_km        Float?
+  factor_fiabilidade   Float?
+  id_marca             Int?
+  empresa              Empresa?     @relation(fields: [id_empresa], references: [id_empresa])
+  motorista            Motorista?   @relation(fields: [id_motorista], references: [id_motorista])
+  marca                Marca?       @relation(fields: [id_marca], references: [id_marca])
+  viagens              Viagem[]
+}
+
+model Viagem {
+  id_viagem      Int           @id @default(autoincrement())
+  id_cliente     Int
+  id_motorista   Int?
+  id_veiculo     Int?
+  origem         String?
+  destino        String?
+  estado         String?
+  custo_estimado Float?
+  custo_real     Float?
+  tempo_estimado Float?
+  preco_pago     Float?
+  tempo_real     Float?
+  cliente        Cliente       @relation(fields: [id_cliente], references: [id_cliente])
+  motorista      Motorista?    @relation(fields: [id_motorista], references: [id_motorista])
+  veiculo        Veiculo?      @relation(fields: [id_veiculo], references: [id_veiculo])
+  ListaEspera    ListaEspera[]
+}
+
+enum tipo_veiculo {
+  L
+  P
+}
